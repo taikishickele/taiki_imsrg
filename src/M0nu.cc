@@ -105,7 +105,7 @@ namespace M0nu
 
   double hT_AA(double qsq)
   {
-    return hGT_AA(qsq);
+    return hGT_AA(qsq); // Does this also need a factor of -1? See the T_AP, T_PP and T_MM functions below. Maybe not see Vincenzo paper
   }
 
   double hT_AP(double qsq)
@@ -173,6 +173,94 @@ namespace M0nu
   {
     double qsq = (p * p + pp * pp - 2 * p * pp * z) * HBARC*HBARC;
     return  formfactor(qsq);
+  }
+
+  double potential_sterile_neutrino(double p, double pp, double z, double Eclosure, std::function<double(double)> formfactor, double neutrinomass) 
+  {
+    double  q = sqrt(p*p+pp*pp-2*p*pp*z)*HBARC;
+    // return HBARC*HBARC*formfactor(q*q)/(q*q+Eclosure*q+neutrinomass*neutrinomass); Old version, this was wrong but only off by ~1% around 100 MeV
+    return HBARC*HBARC*formfactor(q*q)/(q*q+Eclosure*sqrt(q*q + neutrinomass*neutrinomass)+neutrinomass*neutrinomass);
+  }
+
+  double potential_n2lo_soft_neutrino(double p, double pp, double z, std::function<double(double,double)> formfactor, double mu)
+  {
+    // mu is the renormalization scale [MeV]
+    double q = sqrt(p*p+pp*pp-2*p*pp*z) * HBARC;
+    return HBARC*HBARC*formfactor(q*q, mu);
+  }
+
+  // Form Factors for the N2LO Soft Neutrino Contributions
+  // Given in ... and ...
+  double K_VV(double qsq, double mu)
+  {
+    //  qsq = q squared [MeV^2]
+    //  mu = renormalization scale [MeV]
+    double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
+    double coeff1 = (2.0 * (1.0 - qhat) * (1.0 - qhat)) / (qhat**2 * (1.0 + qhat)) * log(1.0 + qhat);
+    double coeff2 = -2.0 / qhat;
+    double coeff3 = (7.0 - 3.0 * qhat * log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED))) / ((1.0 + qhat) * (1.0 + qhat));
+    double coeff4 = log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED)) / (1.0 + qhat);
+    
+    return -(NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (3.0 * M_PION_CHARGED*M_PION_CHARGED * (4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * (coeff1 + coeff2 + coeff3 + coeff4);
+  }
+
+  double K_AA(double qsq, double mu)
+  {
+    double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
+    double coeff1 = (NUCLEON_AXIAL_G*NUCLEON_AXIAL_G) * (log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED)) - 4.0) / (1.0 + qhat);
+    double coeff2 = 1.0 / ((1.0 + qhat)*(1.0 + qhat));
+    
+    return (NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (3 * M_PION_CHARGED*M_PION_CHARGED * (4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * (coeff1 + coeff2);
+  }
+
+  double K_AA_prime(double qsq, double mu)
+  {
+    double at_inv = 36;
+    double as_inv = -8.3;
+    double C_T = PI / M_NUCLEON * ((1/(at_inv - mu)) - (1/(as_inv - mu)));
+    double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
+    double g = 4.0 / sqrt(qhat * (4.0 + qhat)) * atanh(sqrt(qhat / (4.0 + qhat)));
+    double f0 = -(1.0 + 8.0 * qhat) / (6.0 * qhat) + (1.0 + qhat) * (1.0 + 8.0 * qhat + qhat*qhat) / (6.0 * qhat*qhat) * log(1.0 + qhat) - (4.0 + qhat) * (5.0 + 2.0 * qhat) * g / 24.0;
+    double f2 = (1.0 + 8.0 * qhat) / (3.0 * qhat) + (1.0 + qhat)*(1.0 + qhat) * (-1.0 + 5.0 * qhat) / (3.0 * qhat*qhat) * log(1.0 + qhat) - (40.0 + 47.0 * qhat + 10.0 * qhat*qhat) * g / 12.0;
+    double f4 = -(20.0 + 1.0/qhat - 12.0/(4.0 + qhat)) / 6.0 - (-1.0 + 14.0 * qhat + 78.0 * qhat*qhat + 62.0 * qhat*qhat*qhat + 23.0 * qhat*qhat*qhat*qhat) * log(1 + qhat) / (6 * qhat*qhat * (1 + qhat)) + (640.0 + 912.0 * qhat + 375.0 * qhat*qhat + 46.0 * qhat*qhat*qhat) * g / (24 * (4 + qhat));
+    double coeff1 = -3.0/4.0 * (1.0 - NUCLEON_AXIAL_G*NUCLEON_AXIAL_G)*(1.0 - NUCLEON_AXIAL_G*NUCLEON_AXIAL_G) * log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED));
+    double coeff2 = NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * f4;
+    double coeff3 = NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * f2;
+    double coeff4 = 24.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * F_PI*F_PI * C_T * (log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED)) + 1.0);
+
+    return 1.0 / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * (coeff1 + coeff2 + coeff3 + f0 + coeff4);
+  }
+
+  double K_US(double qsq, double mu)
+  {
+    return (2.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (3 * (4.0 * PI * F_PI)*(4.0 * PI * F_PI)) / (qsq + M_PION_CHARGED*M_PION_CHARGED);
+  }
+
+  double K_US_prime(double qsq, double mu)
+  {
+    double at_inv = 36;
+    double as_inv = -8.3;
+    double C_T = PI / M_NUCLEON * ((1/(at_inv - mu)) - (1/(as_inv - mu)));
+    double coeff1 = (2.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) / (qsq + M_PION_CHARGED*M_PION_CHARGED);
+    double coeff2 = - (48.0 * C_T * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G) / ((4.0 * PI)*(4.0 * PI));
+    return coeff1 + coeff2;
+  }
+
+  double K_CT_A(double qsq, double mu)
+  {
+    double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
+    return (NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (M_PION_CHARGED*M_PION_CHARGED * (4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * 5.0/18.0 * qhat / ((1.0 + qhat)*(1.0 + qhat));
+  }
+
+  double K_CT_B(double qsq, double mu)
+  {
+    double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
+    return (NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (3 * M_PION_CHARGED*M_PION_CHARGED * (4.0 * PI * F_PI)*(4.0 * PI * F_PI) * (1.0 + qhat));
+  }
+
+  double K_CT_prime(double qsq, double mu)
+  {
+    return -2.0 / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI));
   }
 
   double integrate_dq(int n, int l, int np, int lp, int S, int J, double hw, PWD &pwd)
@@ -693,6 +781,153 @@ namespace M0nu
     std::cout << "Done precomputing A's." << std::endl;
     Operator M0nuT_TBME = TwoBody_Scalar_operator(modelspace, pwd, 0, 2, 1);
     return M0nuT_TBME;
+  }
+
+  Operator GamowTellerSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass)
+  {
+    double hw = modelspace.GetHbarOmega();         // oscillator basis frequency [MeV]
+    int e2max = modelspace.GetE2max();             // 2*emax
+    int Anuc = modelspace.GetTargetMass();         // the mass number for the desired nucleus
+    const double Rnuc = R0 * pow(Anuc, 1.0 / 3.0); // the nuclear radius [fm]
+    const double prefact = Rnuc / (PI * PI);       // factor in-front of M0nu TBME, extra global factor of 2 since we use <p|\tau|n> = sqrt(2) [fm]
+    modelspace.PreCalculateMoshinsky();            // pre-calculate the needed Moshinsky brackets, for efficiency
+    PWD pwd;                                       // Class for the partial wave decomposition
+    pwd.initializeAngularMesh(100);
+    pwd.initializeMomentumMesh(500);
+    pwd.setMaxMomentum(25);
+    pwd.setPotential([prefact, Eclosure, formfactor, neutrinomass](double p, double pp,  double z){return prefact*potential_sterile_neutrino(p,pp,z,Eclosure,formfactor,neutrinomass);}, "spin-spin");
+    pwd.calcA(e2max,0);
+    pwd.freeAngularMesh();
+    std::cout << "Done precomputing A's." << std::endl;
+    Operator M0nuGT_TBME =  TwoBody_Scalar_operator(modelspace, pwd, 0, 0);
+    return M0nuGT_TBME;
+  }
+
+  Operator FermiSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass)
+  {
+    double hw = modelspace.GetHbarOmega(); // oscillator basis frequency [MeV]
+    int e2max = modelspace.GetE2max(); // 2*emax
+    int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
+    const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [fm]
+    const double prefact = Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
+    modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
+    PWD pwd;
+    pwd.initializeAngularMesh(100);
+    pwd.initializeMomentumMesh(500);
+    pwd.setMaxMomentum(25);
+    pwd.setPotential([prefact, Eclosure, formfactor, neutrinomass](double p, double pp,  double z){return prefact*potential_sterile_neutrino(p,pp,z,Eclosure,formfactor,neutrinomass);}, "central");
+    pwd.calcA(e2max,0);
+    pwd.freeAngularMesh();
+    std::cout<<"Done precomputing A's."<<std::endl;
+    Operator M0nuF_TBME = TwoBody_Scalar_operator(modelspace, pwd, 0, 0);
+    return M0nuF_TBME;
+  }
+
+  Operator TensorSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass)
+  {
+      double hw = modelspace.GetHbarOmega(); // oscillator basis frequency [MeV]
+      int e2max = modelspace.GetE2max(); // 2*emax
+      int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
+      const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [MeV^-1]
+      const double prefact = Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
+      modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
+      PWD pwd;
+      pwd.initializeAngularMesh(100);
+      pwd.initializeMomentumMesh(500);
+      pwd.setMaxMomentum(25);
+      pwd.setPotential([prefact, Eclosure, formfactor, neutrinomass](double p, double pp, double z)
+                       {
+                         double qsq = p*p+pp*pp-2*p*pp*z;
+                         return prefact*(3/qsq)*potential_sterile_neutrino(p, pp, z, Eclosure, formfactor,neutrinomass); 
+                        },
+                        "tensor");
+      pwd.setPotential([prefact,Eclosure, formfactor, neutrinomass](double p, double pp, double z)
+                       {
+                         return -prefact*potential_sterile_neutrino(p, pp, z, Eclosure, formfactor,neutrinomass); 
+                        },
+                       "spin-spin");
+      pwd.calcA(e2max, 0);
+      pwd.freeAngularMesh();
+      std::cout << "Done precomputing A's." << std::endl;
+      Operator M0nuT_TBME = TwoBody_Scalar_operator(modelspace, pwd, 0, 2, 1);
+      return M0nuT_TBME;
+  }
+
+  // N2LO Soft Neutrino Gamow-Teller operator for neutrinoless double beta decay. Operator is written in momentum space and takes the form
+  // ...
+  Operator GamowTellerN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type)
+  {
+    // mu is the renormalization scale [MeV]
+    // reg_type is either "local", "nonlocal", "dipole", or "gaussian"
+    // the dipole and gaussian regulators do not depend on the regulator_power
+    int e2max = modelspace.GetE2max();             // 2*emax
+    int Anuc = modelspace.GetTargetMass();         // the mass number for the desired nucleus
+    const double Rnuc = R0 * pow(Anuc, 1.0 / 3.0); // the nuclear radius [fm]
+    const double prefact = Rnuc / (PI * PI);       // factor in-front of M0nu TBME, extra global factor of 2 since we use <p|\tau|n> = sqrt(2) [fm]
+    modelspace.PreCalculateMoshinsky();            // pre-calculate the needed Moshinsky brackets, for efficiency
+    PWD pwd;                                       // Class for the partial wave decomposition
+    pwd.initializeAngularMesh(100);
+    pwd.initializeMomentumMesh(500);
+    pwd.setMaxMomentum(25);
+    pwd.setRegulator(regulator_cutoff,regulator_power,reg_type);
+    pwd.setPotential([prefact, formfactor, mu](double p, double pp,  double z){return prefact*potential_n2lo_soft_neutrino(p,pp,z,formfactor,mu);}, "spin-spin");
+    pwd.calcA(e2max,0);
+    pwd.freeAngularMesh();
+    std::cout << "Done precomputing A's." << std::endl;
+    Operator M0nuGTN2LO_TBME =  TwoBody_Scalar_operator(modelspace, pwd, 0, 0);
+    return M0nuGTN2LO_TBME;
+  }
+
+  Operator FermiN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type)
+  {
+    // mu is the renormalization scale [MeV]
+    int e2max = modelspace.GetE2max();             // 2*emax
+    int Anuc = modelspace.GetTargetMass();         // the mass number for the desired nucleus
+    const double Rnuc = R0 * pow(Anuc, 1.0 / 3.0); // the nuclear radius [fm]
+    const double prefact = Rnuc / (PI * PI);       // factor in-front of M0nu TBME, extra global factor of 2 since we use <p|\tau|n> = sqrt(2) [fm]
+    modelspace.PreCalculateMoshinsky();            // pre-calculate the needed Moshinsky brackets, for efficiency
+    PWD pwd;                                       // Class for the partial wave decomposition
+    pwd.initializeAngularMesh(100);
+    pwd.initializeMomentumMesh(500);
+    pwd.setMaxMomentum(25);
+    pwd.setRegulator(regulator_cutoff,regulator_power,reg_type);
+    pwd.setPotential([prefact, formfactor, mu](double p, double pp,  double z){return prefact*potential_n2lo_soft_neutrino(p,pp,z,formfactor,mu);}, "central");
+    pwd.calcA(e2max,0);
+    pwd.freeAngularMesh();
+    std::cout << "Done precomputing A's." << std::endl;
+    Operator M0nuFN2LO_TBME =  TwoBody_Scalar_operator(modelspace, pwd, 0, 0);
+    return M0nuFN2LO_TBME;
+  }
+
+  Operator TensorN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type)
+  {
+    // mu is the renormalization scale [MeV]
+    int e2max = modelspace.GetE2max();             // 2*emax
+    int Anuc = modelspace.GetTargetMass();         // the mass number for the desired nucleus
+    const double Rnuc = R0 * pow(Anuc, 1.0 / 3.0); // the nuclear radius [fm]
+    const double prefact = Rnuc / (PI * PI);       // factor in-front of M0nu TBME, extra global factor of 2 since we use <p|\tau|n> = sqrt(2) [fm]
+    modelspace.PreCalculateMoshinsky();            // pre-calculate the needed Moshinsky brackets, for efficiency
+    PWD pwd;                                       // Class for the partial wave decomposition
+    pwd.initializeAngularMesh(100);
+    pwd.initializeMomentumMesh(500);
+    pwd.setMaxMomentum(25);
+    pwd.setRegulator(regulator_cutoff,regulator_power,reg_type);
+    pwd.setPotential([prefact, formfactor, mu](double p, double pp, double z)
+    {
+      double qsq = p*p+pp*pp-2*p*pp*z;
+      return (3/qsq)*prefact*potential_n2lo_soft_neutrino(p,pp,z,formfactor,mu); 
+     },
+     "tensor");
+    pwd.setPotential([prefact, formfactor, mu](double p, double pp, double z)
+    {
+      return -prefact*potential_n2lo_soft_neutrino(p,pp,z,formfactor,mu); 
+     },
+    "spin-spin");
+    pwd.calcA(e2max,0);
+    pwd.freeAngularMesh();
+    std::cout << "Done precomputing A's." << std::endl;
+    Operator M0nuTN2LO_TBME = TwoBody_Scalar_operator(modelspace, pwd, 0, 2, 1);
+    return M0nuTN2LO_TBME;
   }
 
   /// Double Gamow-Teller operator. It is simply the 0vbb GT operator with the neutrino potential set to 1.

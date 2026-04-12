@@ -7,6 +7,7 @@
 #include<iostream>
 #include <gsl/gsl_sf_legendre.h>
 #include "PhysicalConstants.hh"
+#include <cstdint>
 
 using namespace PhysConst;
 
@@ -90,16 +91,32 @@ void PWD::setRegulator(double regulator_cutoff, int regulator_power, std::string
   if (type == "local")
   {
     regulator = [regulator_cutoff, regulator_power](double p, double pp, double z)
-                {
-                  double q = sqrt(p*p+pp*pp-2*p*pp*z);
-                  return regulator_local(q, regulator_cutoff, regulator_power);
-                 };
+    {
+      double q = sqrt(p*p+pp*pp-2*p*pp*z);
+      return regulator_local(q, regulator_cutoff, regulator_power);
+    };
   }
   else if (type == "nonlocal")
   {
     regulator = [regulator_cutoff, regulator_power](double p, double pp, double z)
     {
       return regulator_nonlocal(p, pp, regulator_cutoff, regulator_power);
+    };
+  }
+  else if (type == "dipole")
+  {
+    regulator = [regulator_cutoff, regulator_power](double p, double pp, double z)
+    {
+      double q = sqrt(p*p+pp*pp-2*p*pp*z);
+      return regulator_dipole(q, regulator_cutoff);
+    };
+  }
+  else if (type == "gaussian")
+  {
+    regulator = [regulator_cutoff, regulator_power](double p, double pp, double z)
+    {
+      double q = sqrt(p*p+pp*pp-2*p*pp*z);
+      return regulator_gaussian(q, regulator_cutoff);
     };
   }
 }
@@ -433,4 +450,14 @@ double regulator_local(double q, double regulator_cutoff, int regulator_power)
 double regulator_nonlocal(double p, double pp, double regulator_cutoff, int regulator_power)
 {
   return exp(-pow(p * HBARC / regulator_cutoff, 2 * regulator_power)) * exp(-pow(pp * HBARC / regulator_cutoff, 2 * regulator_power));
+}
+
+double regulator_dipole(double q, double regulator_cutoff)
+{
+  return pow(1 + pow(q * HBARC / regulator_cutoff, 2), -4);
+}
+
+double regulator_gaussian(double q, double regulator_cutoff)
+{
+  return exp(-pow(q * HBARC, 2) / (2 * pow(regulator_cutoff, 2)));
 }

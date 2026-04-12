@@ -47,6 +47,7 @@ std::map<std::string, std::vector<std::string>> ModelSpace::ValenceSpaces{
     {"Ca40_fpg9SemiMagic-shell", {"Ca40", "n0f7", "n0f5", "n1p3", "n1p1", "n0g9"}},
     {"Ca40_fpSemiMagic-shell", {"Ca40", "n0f7", "n0f5", "n1p3", "n1p1"}},
     {"Ca70_fpProtonSemiMagic-shell", {"Ca70", "p0f7", "p0f5", "p1p3", "p1p1"}},
+    {"pgd5", {"Se68", "p1p1", "p1p3", "p1d5", "p0g7", "p0g9", "n1p1", "n1p3", "n1d5", "n0g7", "n0g9"}}, // cross-shell space with orbitals above and below the N=Z=50 shell closure
 
     {"pfhi13NR-shell", {"Pb164", "p2p3", "n2p3", "p2p1", "n2p1", "p1f5", "n1f5", "p1f7", "n1f7", "p0h9", "n0h9", "p0i13", "n0i13"}},
     {"pfhi13sdgij15NR-shell", {"Pb208", "p2p3", "n3s1", "p2p1", "n2d5", "p1f5", "n2d3", "p1f7", "n1g9", "p0h9", "n1g7", "p0i13", "n0i11", "n0j15"}}, // pfh + 0i13  for proton and sdgi +j15 for neutron, nuclei above lead208

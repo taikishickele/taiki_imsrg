@@ -48,6 +48,14 @@ namespace M0nu
   double GTFormFactor(double qsq);
   double FermiFormFactor(double qsq); 
   double TensorFormFactor(double qsq);
+  double K_VV(double qsq, double mu);
+  double K_AA(double qsq, double mu);
+  double K_AA_prime(double qsq, double mu);
+  double K_US(double qsq, double mu);
+  double K_US_prime(double qsq, double mu);
+  double K_CT_A(double qsq, double mu);
+  double K_CT_B(double qsq, double mu);
+  double K_CT_prime(double qsq, double mu);
 
   double integrate_dq(int n, int l, int np, int lp, int S, int J, double hw, PWD &pwd);
   uint64_t IntHash(int n, int l, int np, int lp, int S, int J);
@@ -67,6 +75,15 @@ namespace M0nu
   Operator GamowTellerHeavy(ModelSpace &modelspace,  std::string src, std::function<double(double)> formfactor); ///< Gamow-Teller part of M0nu operator
   Operator FermiHeavy(ModelSpace &modelspace, std::string src, std::function<double(double)> formfactor);       ///< Fermi part of M0nu operator
   Operator TensorHeavy(ModelSpace &modelspace, std::string src, std::function<double(double)> formfactor);      ///< Tensor part of M0nu operator
+
+  Operator GamowTellerSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass);
+  Operator FermiSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass);
+  Operator TensorSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass);
+  Operator ContactSterile(ModelSpace& modelspace, double regulator_cutoff, int regulator_power, double neutrinomass); // likely wrong
+
+  Operator GamowTellerN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type);
+  Operator FermiN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type);
+  Operator TensorN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type);
 
   double HO_Radial_psi(int n, int l, double hw, double r);
   double fq_radial_GT(double q, double Eclosure, double r12);
