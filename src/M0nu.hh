@@ -79,7 +79,6 @@ namespace M0nu
   Operator GamowTellerSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass);
   Operator FermiSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass);
   Operator TensorSterile(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor, double neutrinomass);
-  Operator ContactSterile(ModelSpace& modelspace, double regulator_cutoff, int regulator_power, double neutrinomass); // likely wrong
 
   Operator GamowTellerN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type);
   Operator FermiN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type);
@@ -87,10 +86,24 @@ namespace M0nu
 
   double HO_Radial_psi(int n, int l, double hw, double r);
   double fq_radial_GT(double q, double Eclosure, double r12);
+  double fq_radial_sterile(double q, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
+  double fq_radial_n2lo(double q, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
   double integrate_dq_radial_GT(double Eclosure, double r12,  int npoints, gsl_integration_glfixed_table * t);
+  double integrate_dq_radial_sterile(double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12, int npoints, gsl_integration_glfixed_table * t);
+  double integrate_dq_radial_n2lo(std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12, int npoints, gsl_integration_glfixed_table * t);
   std::unordered_map<uint64_t,double> PreCalculateM0nuIntegrals_R(int e2max, double hw, double Eclosure, double r12);
+  std::unordered_map<uint64_t,double> PreCalculateM0nuSterileIntegrals_R(int e2max, double hw, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
+  std::unordered_map<uint64_t,double> PreCalculateM0nuN2LOIntegrals_R(int e2max, double hw, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
   double GetM0nuIntegral_R(int e2max, int n, int l, int np, int lp,int J, double hw, double Eclosure, double r12, std::unordered_map<uint64_t,double> &IntList);
+  double GetM0nuSterileIntegral_R(int e2max, int n, int l, int np, int lp, int S, int J, double hw, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12, std::unordered_map<uint64_t,double> &IntList);
+  double GetM0nuN2LOIntegral_R(int e2max, int n, int l, int np, int lp, int S, int J, double hw, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12, std::unordered_map<uint64_t,double> &IntList);
   Operator GamowTeller_R(ModelSpace& modelspace, double Eclosure, double r12);
+  Operator GamowTellerSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
+  Operator FermiSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
+  Operator TensorSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
+  Operator GamowTellerN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
+  Operator FermiN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
+  Operator TensorN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
   Operator DGT_R(ModelSpace& modelspace, double r12);
 
   long double TalmiB(int na, int la, int nb, int lb, int p);

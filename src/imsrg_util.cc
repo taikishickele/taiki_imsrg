@@ -442,7 +442,6 @@ namespace imsrg_util
       }
       else if (opnamesplit[0] == "M0nuSterile") // Neutrinoless Double Beta Decay Operators with the neutrino mass term included   format e.g. M0nuSterile_GT_7.72_none_AP_25.0
       {
-        
         std::string M0nuopname = opnamesplit[1];
         std::map<std::string, Operator (*)(ModelSpace&, double, std::string, std::function<double(double)>, double)> OPList{
             {"GT", &M0nu::GamowTellerSterile},
@@ -513,16 +512,6 @@ namespace imsrg_util
             }
           }
         }
-        else
-        {
-          double regulator_cutoff;
-          std::istringstream(opnamesplit[2]) >> regulator_cutoff;
-          int regulator_power;
-          std::istringstream(opnamesplit[3]) >> regulator_power;
-          double neutrinomass;
-          std::istringstream(opnamesplit[4]) >> neutrinomass;
-          theop = M0nu::ContactSterile(modelspace, regulator_cutoff, regulator_power, neutrinomass); // this is likely wrong
-        } 
       }
       else if (opnamesplit[0] == "M0nuN2LO") // Neutrinoless double beta decay operators at N2LO in chiral EFT for soft neutrino contributions
       // Formatted as M0nuN2LO_GT_VV_1000.0_500.0_3_local
@@ -691,13 +680,174 @@ namespace imsrg_util
         std::istringstream(opnamesplit[2]) >> r12;
         theop = M0nu::GamowTeller_R(modelspace, Eclosure, r12);
       }
-      else if (opnamesplit[0] == "DGTR") //Radial depedance of DGT operator
+      else if (opnamesplit[0] == "M0nuSterileR") // Radial dependance of the sterile neutrino NME
+      {
+        std::string M0nuopname = opnamesplit[1];
+        std::map<std::string, Operator (*)(ModelSpace&, double, std::string, std::function<double(double)>, double)> OPList{
+            {"GT", &M0nu::GamowTellerSterile_R},
+            {"F", &M0nu::FermiSterile_R}, // not implemented yet
+            {"T", &M0nu::TensorSterile_R}}; // not implemented yet
+        if (M0nuopname != "C")
+        {
+          double Eclosure;
+          std::istringstream(opnamesplit[2]) >> Eclosure;
+          std::string src = opnamesplit[3];
+          std::string formfactor = opnamesplit[4];
+          double neutrinomass;
+          std::istringstream(opnamesplit[5]) >> neutrinomass;
+          double r12;
+          std::istringstream(opnamesplit[6]) >> r12;
+
+          if (formfactor == "none")
+          {
+            std::cerr << "Error: formfactor cannot be \"none\" for operator " << M0nuopname << std::endl;
+            exit(1);
+          }
+          else
+          {
+            if (M0nuopname == "GT")
+            {
+              if (formfactor == "AA")
+              {
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, M0nu::hGT_AA, neutrinomass, r12);
+              }
+              else if (formfactor == "AP")
+              {
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, src, M0nu::hGT_AP, neutrinomass, r12);
+              }
+              else if (formfactor == "PP")
+              {
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, src, M0nu::hGT_PP, neutrinomass, r12);
+              }
+              else if (formfactor == "MM")
+              {
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, src, M0nu::hGT_MM, neutrinomass, r12);
+              }
+            }
+            else if (M0nuopname == "F")
+            {
+              theop = M0nu::FermiSterile_R(modelspace, Eclosure, src, M0nu::hF_VV, neutrinomass, r12);
+            }
+            else if (M0nuopname == "T")
+            {
+              if (formfactor == "AA")
+              {
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_AA, neutrinomass, r12);
+              }
+              else if (formfactor == "AP")
+              {
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_AP, neutrinomass, r12);
+              }
+              else if (formfactor == "PP")
+              {
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_PP, neutrinomass, r12);
+              }
+              else if (formfactor == "MM")
+              {
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_MM, neutrinomass, r12);
+              }
+            }
+          }
+        }
+      }
+      else if (opnamesplit[0] == "M0nuN2LOR") // Radial dependence of the N2LO M0nu NMEs
+      // Neutrinoless double beta decay operators at N2LO in chiral EFT for soft neutrino contributions
+      // Formatted as M0nuN2LOR_GT_VV_1000.0_500.0_3_local
+      // FIX IT ALL
+      {
+        std::string M0nuopname = opnamesplit[1];
+        std::map<std::string, Operator (*)(ModelSpace&, std::function<double(double,double)>, double, double, int, std::string)> OPList{
+            {"GT", &M0nu::GamowTellerN2LO},
+            {"F", &M0nu::FermiN2LO},
+            {"T", &M0nu::TensorN2LO}};
+
+        std::string formfactor = opnamesplit[2];
+        double mu;
+        std::istringstream(opnamesplit[3]) >> mu;
+        double reg_cutoff;
+        std::istringstream(opnamesplit[4]) >> reg_cutoff;
+        int reg_power;
+        std::istringstream(opnamesplit[5]) >> reg_power;
+        std::string reg_type = opnamesplit[6];
+        double r12;
+        std::istringstream(opnamesplit[7]) >> r12;
+
+        if (formfactor == "none")
+        {
+          std::cout << "Need to define the form factor!: " << opname << std::endl;
+        }
+        else
+        {
+          if (M0nuopname == "GT")
+          {
+            if (formfactor == "VV")
+            {
+              theop = M0nu::GamowTellerN2LO_R(modelspace, M0nu::K_VV, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "AA")
+            {
+              theop = M0nu::GamowTellerN2LO_R(modelspace, M0nu::K_AA, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "US")
+            {
+              theop = M0nu::GamowTellerN2LO_R(modelspace, M0nu::K_US, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "CTA")
+            {
+              theop = M0nu::GamowTellerN2LO_R(modelspace, M0nu::K_CT_A, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "CTB")
+            {
+              theop = M0nu::GamowTellerN2LO_R(modelspace, M0nu::K_CT_B, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+          }
+          else if (M0nuopname == "F")
+          {
+            if (formfactor == "AA-prime")
+            {
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_AA_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "US-prime")
+            {
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_US_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "CT-prime")
+            {
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_CT_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+          }
+          else if (M0nuopname == "T")
+          {
+            if (formfactor == "VV")
+            {
+              theop = M0nu::TensorN2LO_R(modelspace, M0nu::K_VV, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "AA")
+            {
+              theop = M0nu::TensorN2LO_R(modelspace, M0nu::K_AA, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "US")
+            {
+              theop = M0nu::TensorN2LO_R(modelspace, M0nu::K_US, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "CTA")
+            {
+              theop = M0nu::TensorN2LO_R(modelspace, M0nu::K_CT_A, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "CTB")
+            {
+              theop = M0nu::TensorN2LO_R(modelspace, M0nu::K_CT_B, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+          }  
+        }
+      }
+      else if (opnamesplit[0] == "DGTR") //Radial depedence of DGT operator
       {
         double r12;
         std::istringstream(opnamesplit[1]) >> r12;
         theop = M0nu::DGT_R(modelspace, r12);
       }
-      else if (opnamesplit[0] == "DGTRLocal") //Radial depedance of DGT operator with surface localization
+      else if (opnamesplit[0] == "DGTRLocal") //Radial depedence of DGT operator with surface localization
       {
         double r12;
         std::istringstream(opnamesplit[1]) >> r12;
