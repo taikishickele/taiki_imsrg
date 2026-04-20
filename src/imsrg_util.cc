@@ -683,7 +683,7 @@ namespace imsrg_util
       else if (opnamesplit[0] == "M0nuSterileR") // Radial dependance of the sterile neutrino NME
       {
         std::string M0nuopname = opnamesplit[1];
-        std::map<std::string, Operator (*)(ModelSpace&, double, std::string, std::function<double(double)>, double)> OPList{
+        std::map<std::string, Operator (*)(ModelSpace&, double, std::function<double(double)>, double, double)> OPList{
             {"GT", &M0nu::GamowTellerSterile_R},
             {"F", &M0nu::FermiSterile_R}, // not implemented yet
             {"T", &M0nu::TensorSterile_R}}; // not implemented yet
@@ -700,8 +700,12 @@ namespace imsrg_util
 
           if (formfactor == "none")
           {
-            std::cerr << "Error: formfactor cannot be \"none\" for operator " << M0nuopname << std::endl;
-            exit(1);
+            std::map<std::string, std::function<double(double)>> FormFactorList{
+              {"GT",M0nu::GTFormFactor},
+              {"F", M0nu::FermiFormFactor},
+              {"T", M0nu::TensorFormFactor}
+          };
+          theop = OPList[M0nuopname](modelspace, Eclosure, FormFactorList[M0nuopname], neutrinomass, r12);
           }
           else
           {
@@ -713,38 +717,38 @@ namespace imsrg_util
               }
               else if (formfactor == "AP")
               {
-                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, src, M0nu::hGT_AP, neutrinomass, r12);
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, M0nu::hGT_AP, neutrinomass, r12);
               }
               else if (formfactor == "PP")
               {
-                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, src, M0nu::hGT_PP, neutrinomass, r12);
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, M0nu::hGT_PP, neutrinomass, r12);
               }
               else if (formfactor == "MM")
               {
-                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, src, M0nu::hGT_MM, neutrinomass, r12);
+                theop = M0nu::GamowTellerSterile_R(modelspace, Eclosure, M0nu::hGT_MM, neutrinomass, r12);
               }
             }
             else if (M0nuopname == "F")
             {
-              theop = M0nu::FermiSterile_R(modelspace, Eclosure, src, M0nu::hF_VV, neutrinomass, r12);
+              theop = M0nu::FermiSterile_R(modelspace, Eclosure, M0nu::hF_VV, neutrinomass, r12);
             }
             else if (M0nuopname == "T")
             {
               if (formfactor == "AA")
               {
-                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_AA, neutrinomass, r12);
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, M0nu::hT_AA, neutrinomass, r12);
               }
               else if (formfactor == "AP")
               {
-                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_AP, neutrinomass, r12);
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, M0nu::hT_AP, neutrinomass, r12);
               }
               else if (formfactor == "PP")
               {
-                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_PP, neutrinomass, r12);
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, M0nu::hT_PP, neutrinomass, r12);
               }
               else if (formfactor == "MM")
               {
-                theop = M0nu::TensorSterile_R(modelspace, Eclosure, src, M0nu::hT_MM, neutrinomass, r12);
+                theop = M0nu::TensorSterile_R(modelspace, Eclosure, M0nu::hT_MM, neutrinomass, r12);
               }
             }
           }
@@ -756,10 +760,10 @@ namespace imsrg_util
       // FIX IT ALL
       {
         std::string M0nuopname = opnamesplit[1];
-        std::map<std::string, Operator (*)(ModelSpace&, std::function<double(double,double)>, double, double, int, std::string)> OPList{
-            {"GT", &M0nu::GamowTellerN2LO},
-            {"F", &M0nu::FermiN2LO},
-            {"T", &M0nu::TensorN2LO}};
+        std::map<std::string, Operator (*)(ModelSpace&, std::function<double(double,double)>, double, double, int, std::string, double)> OPList{
+            {"GT", &M0nu::GamowTellerN2LO_R},
+            {"F", &M0nu::FermiN2LO_R},
+            {"T", &M0nu::TensorN2LO_R}};
 
         std::string formfactor = opnamesplit[2];
         double mu;
