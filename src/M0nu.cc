@@ -195,6 +195,7 @@ namespace M0nu
   {
     //  qsq = q squared [MeV^2]
     //  mu = renormalization scale [MeV]
+    //  Returns in units of [MeV^-2]
     double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
     double coeff1 = (2.0 * (1.0 - qhat) * (1.0 - qhat)) / (qhat*qhat * (1.0 + qhat)) * log(1.0 + qhat);
     double coeff2 = -2.0 / qhat;
@@ -1104,11 +1105,11 @@ namespace M0nu
   {
     if (transition == "F" or transition == "GT")
     {
-       return gsl_sf_bessel_j0(q*r12)*q*q * formfactor(q*q*HBARC*HBARC, mu); // fix check for missing factors of HBARC
+       return gsl_sf_bessel_j0(q*r12)*q*q*HBARC*HBARC * formfactor(q*q*HBARC*HBARC, mu);
     }
     else if (transition == "T")
     {
-      return gsl_sf_bessel_j2(q*r12)*q*q * formfactor(q*q*HBARC*HBARC, mu);
+      return gsl_sf_bessel_j2(q*r12)*q*q*HBARC*HBARC * formfactor(q*q*HBARC*HBARC, mu);
     }
     else
     {
