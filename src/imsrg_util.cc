@@ -674,19 +674,80 @@ namespace imsrg_util
       }
       else if (opnamesplit[0] == "M0nuR") // Radial dependance of GT part of M0nu
       {
+        std::string M0nuopname = opnamesplit[1];
+        std::map<std::string, Operator (*)(ModelSpace&, double, std::function<double(double)>, double)> OPList{
+          {"GT", &M0nu::GamowTeller_R},
+          {"F", &M0nu::Fermi_R},
+          {"T", &M0nu::Tensor_R}};
+
         double Eclosure;
         double r12;
-        std::istringstream(opnamesplit[1]) >> Eclosure;
-        std::istringstream(opnamesplit[2]) >> r12;
-        theop = M0nu::GamowTeller_R(modelspace, Eclosure, r12);
+        std::istringstream(opnamesplit[2]) >> Eclosure;
+        std::string formfactor = opnamesplit[3];
+        std::istringstream(opnamesplit[4]) >> r12;
+
+        if (formfactor == "none")
+        {
+          std::map<std::string, std::function<double(double)>> FormFactorList{
+            {"GT",M0nu::GTFormFactor},
+            {"F", M0nu::FermiFormFactor},
+            {"T", M0nu::TensorFormFactor}
+        };
+        theop = OPList[M0nuopname](modelspace, Eclosure, FormFactorList[M0nuopname], r12);
+        }
+        else
+        {
+          if (M0nuopname == "GT")
+          {
+            if (formfactor == "AA")
+            {
+              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_AA, r12);
+            }
+            else if (formfactor == "AP")
+            {
+              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_AP, r12);
+            }
+            else if (formfactor == "PP")
+            {
+              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_PP, r12);
+            }
+            else if (formfactor == "MM")
+            {
+              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_MM, r12);
+            }
+          }
+          else if (M0nuopname == "F")
+          {
+            theop = M0nu::Fermi_R(modelspace, Eclosure, M0nu::hF_VV, r12);
+          }
+          else if (M0nuopname == "T")
+          {
+            if (formfactor == "AA")
+            {
+              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_AA, r12);
+            }
+            else if (formfactor == "AP")
+            {
+              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_AP, r12);
+            }
+            else if (formfactor == "PP")
+            {
+              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_PP, r12);
+            }
+            else if (formfactor == "MM")
+            {
+              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_MM, r12);
+            }
+          }
+        }
       }
       else if (opnamesplit[0] == "M0nuSterileR") // Radial dependance of the sterile neutrino NME
       {
         std::string M0nuopname = opnamesplit[1];
         std::map<std::string, Operator (*)(ModelSpace&, double, std::function<double(double)>, double, double)> OPList{
             {"GT", &M0nu::GamowTellerSterile_R},
-            {"F", &M0nu::FermiSterile_R}, // not implemented yet
-            {"T", &M0nu::TensorSterile_R}}; // not implemented yet
+            {"F", &M0nu::FermiSterile_R},
+            {"T", &M0nu::TensorSterile_R}};
         if (M0nuopname != "C")
         {
           double Eclosure;
@@ -757,7 +818,6 @@ namespace imsrg_util
       else if (opnamesplit[0] == "M0nuN2LOR") // Radial dependence of the N2LO M0nu NMEs
       // Neutrinoless double beta decay operators at N2LO in chiral EFT for soft neutrino contributions
       // Formatted as M0nuN2LOR_GT_VV_1000.0_500.0_3_local
-      // FIX IT ALL
       {
         std::string M0nuopname = opnamesplit[1];
         std::map<std::string, Operator (*)(ModelSpace&, std::function<double(double,double)>, double, double, int, std::string, double)> OPList{
