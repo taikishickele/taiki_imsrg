@@ -562,13 +562,21 @@ namespace imsrg_util
           }
           else if (M0nuopname == "F")
           {
-            if (formfactor == "AA-prime")
+            if (formfactor == "AAA-prime")
             {
-              theop = M0nu::FermiN2LO(modelspace, M0nu::K_AA_prime, mu, reg_cutoff, reg_power, reg_type);
+              theop = M0nu::FermiN2LO(modelspace, M0nu::K_AA_A_prime, mu, reg_cutoff, reg_power, reg_type);
             }
-            else if (formfactor == "US-prime")
+            else if (formfactor == "AAB-prime")
             {
-              theop = M0nu::FermiN2LO(modelspace, M0nu::K_US_prime, mu, reg_cutoff, reg_power, reg_type);
+              theop = M0nu::FermiN2LO(modelspace, M0nu::K_AA_B_prime, mu, reg_cutoff, reg_power, reg_type);
+            }
+            else if (formfactor == "USA-prime")
+            {
+              theop = M0nu::FermiN2LO(modelspace, M0nu::K_US_A_prime, mu, reg_cutoff, reg_power, reg_type);
+            }
+            else if (formfactor == "USB-prime")
+            {
+              theop = M0nu::FermiN2LO(modelspace, M0nu::K_US_B_prime, mu, reg_cutoff, reg_power, reg_type);
             }
             else if (formfactor == "CT-prime")
             {
@@ -867,13 +875,21 @@ namespace imsrg_util
           }
           else if (M0nuopname == "F")
           {
-            if (formfactor == "AA-prime")
+            if (formfactor == "AAA-prime")
             {
-              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_AA_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_AA_A_prime, mu, reg_cutoff, reg_power, reg_type, r12);
             }
-            else if (formfactor == "US-prime")
+            else if (formfactor == "AAB-prime")
             {
-              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_US_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_AA_B_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "USA-prime")
+            {
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_US_A_prime, mu, reg_cutoff, reg_power, reg_type, r12);
+            }
+            else if (formfactor == "USB-prime")
+            {
+              theop = M0nu::FermiN2LO_R(modelspace, M0nu::K_US_B_prime, mu, reg_cutoff, reg_power, reg_type, r12);
             }
             else if (formfactor == "CT-prime")
             {

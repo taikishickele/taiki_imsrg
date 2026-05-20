@@ -214,11 +214,8 @@ namespace M0nu
     return (NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (3 * M_PION_CHARGED*M_PION_CHARGED * (4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * (coeff1 + coeff2);
   }
 
-  double K_AA_prime(double qsq, double mu)
+  double K_AA_A_prime(double qsq, double mu)
   {
-    double at_inv = 36;
-    double as_inv = -8.3;
-    double C_T = PI / M_NUCLEON * ((1/(at_inv - mu)) - (1/(as_inv - mu)));
     double qhat = qsq/(M_PION_CHARGED*M_PION_CHARGED);
     double g = 4.0 / sqrt(qhat * (4.0 + qhat)) * atanh(sqrt(qhat / (4.0 + qhat)));
     double f0 = -(1.0 + 8.0 * qhat) / (6.0 * qhat) + (1.0 + qhat) * (1.0 + 8.0 * qhat + qhat*qhat) / (6.0 * qhat*qhat) * log(1.0 + qhat) - (4.0 + qhat) * (5.0 + 2.0 * qhat) * g / 24.0;
@@ -227,9 +224,13 @@ namespace M0nu
     double coeff1 = 3.0/4.0 * (1.0 - NUCLEON_AXIAL_G*NUCLEON_AXIAL_G)*(1.0 - NUCLEON_AXIAL_G*NUCLEON_AXIAL_G) * log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED));
     double coeff2 = -1.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * f4;
     double coeff3 = -1.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * f2;
-    double coeff4 = -24.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * F_PI*F_PI * C_T * (log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED)) + 1.0);
+    
+    return 1.0 / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * (coeff1 + coeff2 + coeff3 - f0);
+  }
 
-    return 1.0 / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * (coeff1 + coeff2 + coeff3 - f0 + coeff4);
+  double K_AA_B_prime(double qsq, double mu)
+  {
+    return -24.0 / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * F_PI*F_PI * (log(mu*mu / (M_PION_CHARGED*M_PION_CHARGED)) + 1.0);
   }
 
   double K_US(double qsq, double mu)
@@ -237,14 +238,14 @@ namespace M0nu
     return - (2.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / (3 * (4.0 * PI * F_PI)*(4.0 * PI * F_PI)) / (qsq + M_PION_CHARGED*M_PION_CHARGED);
   }
 
-  double K_US_prime(double qsq, double mu)
+  double K_US_A_prime(double qsq, double mu)
   {
-    double at_inv = 36;
-    double as_inv = -8.3;
-    double C_T = PI / M_NUCLEON * ((1/(at_inv - mu)) - (1/(as_inv - mu)));
-    double coeff1 = - (2.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) / (qsq + M_PION_CHARGED*M_PION_CHARGED);
-    double coeff2 = + (48.0 * C_T * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G) / ((4.0 * PI)*(4.0 * PI));
-    return coeff1 + coeff2;
+    return - (2.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G*NUCLEON_AXIAL_G * qsq) / ((4.0 * PI * F_PI)*(4.0 * PI * F_PI)) / (qsq + M_PION_CHARGED*M_PION_CHARGED);
+  }
+
+  double K_US_B_prime(double qsq, double mu)
+  {
+    return (48.0 * NUCLEON_AXIAL_G*NUCLEON_AXIAL_G) / ((4.0 * PI)*(4.0 * PI));
   }
 
   double K_CT_A(double qsq, double mu)

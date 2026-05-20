@@ -50,9 +50,11 @@ namespace M0nu
   double TensorFormFactor(double qsq);
   double K_VV(double qsq, double mu);
   double K_AA(double qsq, double mu);
-  double K_AA_prime(double qsq, double mu);
+  double K_AA_A_prime(double qsq, double mu);
+  double K_AA_B_prime(double qsq, double mu);
   double K_US(double qsq, double mu);
-  double K_US_prime(double qsq, double mu);
+  double K_US_A_prime(double qsq, double mu);
+  double K_US_B_prime(double qsq, double mu);
   double K_CT_A(double qsq, double mu);
   double K_CT_B(double qsq, double mu);
   double K_CT_prime(double qsq, double mu);
