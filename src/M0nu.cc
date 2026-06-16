@@ -1809,6 +1809,7 @@ namespace M0nu
   Operator Tensor_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12)
   {
     bool reduced = true;
+    r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "T";
@@ -2226,6 +2227,7 @@ namespace M0nu
   Operator TensorSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12)
   {
     bool reduced = true;
+    r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "T";
@@ -2643,6 +2645,7 @@ namespace M0nu
   Operator TensorN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12)
   {
     bool reduced = true;
+    r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "T";
