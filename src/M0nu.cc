@@ -1213,7 +1213,7 @@ namespace M0nu
               int tempmaxJ = std::min(l+1,lp+1);
               for (int J = minJ; J<= tempmaxJ; J++)
               {
-                uint64_t key = IntHash(n,l,np,l,1,J);
+                uint64_t key = IntHash(n,l,np,lp,1,J);
                 KEYS.push_back(key);
                 IntList[key] = 0.0; // "Make sure eveything's in there to avoid a rehash in the parallel loop" (RS)
               }
@@ -1296,7 +1296,7 @@ namespace M0nu
               int tempmaxJ = std::min(l+1,lp+1);
               for (int J = minJ; J<= tempmaxJ; J++)
               {
-                uint64_t key = IntHash(n,l,np,l,1,J);
+                uint64_t key = IntHash(n,l,np,lp,1,J);
                 KEYS.push_back(key);
                 IntList[key] = 0.0; // "Make sure eveything's in there to avoid a rehash in the parallel loop" (RS)
               }
@@ -1379,7 +1379,7 @@ namespace M0nu
                 int tempmaxJ = std::min(l+1,lp+1);
                 for (int J = minJ; J<= tempmaxJ; J++)
                 {
-                  uint64_t key = IntHash(n,l,np,l,1,J);
+                  uint64_t key = IntHash(n,l,np,lp,1,J);
                   KEYS.push_back(key);
                   IntList[key] = 0.0; // "Make sure eveything's in there to avoid a rehash in the parallel loop" (RS)
                 }
@@ -1821,7 +1821,7 @@ namespace M0nu
     M0nuT_TBME.SetHermitian(); // it should be Hermitian
     int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
     const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [MeV^-1]
-    const double prefact = Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
+    const double prefact = 4*Rnuc/(PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
     modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
     std::unordered_map<uint64_t,double> IntList = PreCalculateM0nuIntegrals_R(e2max, hw, transition, formfactor, Eclosure, r12); // pre-calculate the needed integrals over dq and dr, for efficiency
     M0nuT_TBME.profiler.timer["M0nuT_1_sur"] += omp_get_wtime() - t_start; // profiling (r)
@@ -1927,7 +1927,7 @@ namespace M0nu
                           if ( (std::abs(J-Jrel)>Lam)  or ( (Jrel+J)<Lam) ) continue;
                           normJrel  = sqrt((2*Jrel+1)*(2*Lf+1))*phase(Lf+lr+J+S)*AngMom::SixJ(Lam,lr,Lf,S,J,Jrel);
                           normJrelp = sqrt((2*Jrel+1)*(2*Li+1))*phase(Li+lpr+J+S)*AngMom::SixJ(Lam,lpr,Li,S,J,Jrel);
-                          integral += normJrel*normJrelp*GetM0nuIntegral_R(e2max,nr,lr,npr,lr,S,Jrel,hw,transition,formfactor,Eclosure,r12,IntList);
+                          integral += normJrel*normJrelp*GetM0nuIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,Eclosure,r12,IntList);
                         }
                         sumMT += Df*Di*integral; // perform the Moshinsky transformation
                         sumMTas += Df*asDi*integral; // (anti-symmetric part)
@@ -2239,7 +2239,7 @@ namespace M0nu
     M0nuT_TBME.SetHermitian(); // it should be Hermitian
     int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
     const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [MeV^-1]
-    const double prefact = Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
+    const double prefact = 4*Rnuc/(PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
     modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
     std::unordered_map<uint64_t,double> IntList = PreCalculateM0nuSterileIntegrals_R(e2max, hw, transition, formfactor, Eclosure, neutrinomass, r12); // pre-calculate the needed integrals over dq and dr, for efficiency
     M0nuT_TBME.profiler.timer["M0nuSterileT_1_sur"] += omp_get_wtime() - t_start; // profiling (r)
@@ -2345,7 +2345,7 @@ namespace M0nu
                           if ( (std::abs(J-Jrel)>Lam)  or ( (Jrel+J)<Lam) ) continue;
                           normJrel  = sqrt((2*Jrel+1)*(2*Lf+1))*phase(Lf+lr+J+S)*AngMom::SixJ(Lam,lr,Lf,S,J,Jrel);
                           normJrelp = sqrt((2*Jrel+1)*(2*Li+1))*phase(Li+lpr+J+S)*AngMom::SixJ(Lam,lpr,Li,S,J,Jrel);
-                          integral += normJrel*normJrelp*GetM0nuSterileIntegral_R(e2max,nr,lr,npr,lr,S,Jrel,hw,transition,formfactor,Eclosure,neutrinomass,r12,IntList);
+                          integral += normJrel*normJrelp*GetM0nuSterileIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,Eclosure,neutrinomass,r12,IntList);
                         }
                         sumMT += Df*Di*integral; // perform the Moshinsky transformation
                         sumMTas += Df*asDi*integral; // (anti-symmetric part)
@@ -2520,7 +2520,7 @@ namespace M0nu
     M0nuF_TBME.SetHermitian(); // it should be Hermitian
     int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
     const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [fm]
-    const double prefact = 4*Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
+    const double prefact = 4*Rnuc/(PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
     modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
     std::unordered_map<uint64_t,double> IntList = PreCalculateM0nuN2LOIntegrals_R(e2max, hw, transition, formfactor, mu, regulator_cutoff, regulator_power, reg_type, r12); // pre-calculate the needed integrals over dq and dr, for efficiency
     M0nuF_TBME.profiler.timer["M0nuN2LOF_1_sur"] += omp_get_wtime() - t_start; // profiling (r)
@@ -2657,7 +2657,7 @@ namespace M0nu
     M0nuT_TBME.SetHermitian(); // it should be Hermitian
     int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
     const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [MeV^-1]
-    const double prefact = Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
+    const double prefact = 4*Rnuc/(PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [MeV^-1]
     modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
     std::unordered_map<uint64_t,double> IntList = PreCalculateM0nuN2LOIntegrals_R(e2max, hw, transition, formfactor, mu, regulator_cutoff, regulator_power, reg_type, r12); // pre-calculate the needed integrals over dq and dr, for efficiency
     M0nuT_TBME.profiler.timer["M0nuN2LOT_1_sur"] += omp_get_wtime() - t_start; // profiling (r)
@@ -2763,7 +2763,7 @@ namespace M0nu
                           if ( (std::abs(J-Jrel)>Lam)  or ( (Jrel+J)<Lam) ) continue;
                           normJrel  = sqrt((2*Jrel+1)*(2*Lf+1))*phase(Lf+lr+J+S)*AngMom::SixJ(Lam,lr,Lf,S,J,Jrel);
                           normJrelp = sqrt((2*Jrel+1)*(2*Li+1))*phase(Li+lpr+J+S)*AngMom::SixJ(Lam,lpr,Li,S,J,Jrel);
-                          integral += normJrel*normJrelp*GetM0nuN2LOIntegral_R(e2max,nr,lr,npr,lr,S,Jrel,hw,transition,formfactor,mu,regulator_cutoff,regulator_power,reg_type,r12,IntList);
+                          integral += normJrel*normJrelp*GetM0nuN2LOIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,mu,regulator_cutoff,regulator_power,reg_type,r12,IntList);
                         }
                         sumMT += Df*Di*integral; // perform the Moshinsky transformation
                         sumMTas += Df*asDi*integral; // (anti-symmetric part)
