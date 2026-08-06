@@ -3,7 +3,7 @@ From: ubuntu:latest
 Stage:compile
 
 %files
-  ../imsrg /imsrg
+  ../taiki_imsrg /taiki_imsrg
 
 %post
   DEBIAN_FRONTEND=noninteractive
@@ -20,13 +20,11 @@ Stage:compile
   cmake \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-  cd imsrg
-  cmake CMakeLists.txt
-  make
+  rm -rf /taiki_imsrg/build
+  cmake -S /taiki_imsrg/src -B /taiki_imsrg/build
+  cmake --build /taiki_imsrg/build -j $(nproc)
+  find /taiki_imsrg/build -name '*IMSRG*.so'
 
-
-%labels
-  Author Antoine Belley
 
 Bootstrap: docker
 From: ubuntu:latest
@@ -44,9 +42,13 @@ Stage:final
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 %files from compile
-  /imsrg/pyIMSRG.cpython-*-x86_64-linux-gnu.so /lib/
+  /taiki_imsrg/build/pyIMSRG.so /lib/
+  /taiki_imsrg/build/libIMSRG.so /lib/
 
 %environment
   export PYTHONPATH="$PYTHONPATH:/lib/"
   export PATH="$PATH:/lib"
-  
+  export LD_LIBRARY_PATH="/lib:$LD_LIBRARY_PATH"
+
+%labels
+  Author Antoine Belley

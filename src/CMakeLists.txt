@@ -1,4 +1,16 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.18)
+set(INSTDIR $ENV{HOME})
+set(BLA_VENDOR OpenBLAS)
+# set(CMAKE_SKIP_INSTALL_RPATH ON)
+# set(CMAKE_SYSTEM_PREFIX_PATH $ENV{EBROOTGENTOO})
+set(CMAKE_CURRENT_BINARY_DIR "../build")
+
+option(IMSRG_BUILD_PYTHON_BINDINGS "Build Python bindings" ON)
+
+# Place to put any settings for quirks of your specific environment
+# e.g. maybe you want a different BLAS, or maybe you need to
+# explicitly set some additional variables for whatever reason
+include(local_settings.cmake OPTIONAL)
 
 # Determine if imsrg++ is built as a subproject (using add_subdirectory)
 # or if it is the main project.
@@ -17,13 +29,40 @@ if(IMSRGPLUSPLUS_MAIN_PROJECT AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+project(imsrg++ VERSION 0.1.0)
+
+find_package(OpenMP REQUIRED)
+find_package(BLAS REQUIRED)
+find_package(GSL REQUIRED)
+find_package(Boost REQUIRED)
+find_package(ZLIB REQUIRED)
+# find_package(Armadillo REQUIRED)
+# include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 
+add_compile_options(-frounding-math)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(IMSRGPLUSPLUS_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
+if(IMSRG_BUILD_PYTHON_BINDINGS)
+    # We only need this for the Python bindings.
+    # In principle, everything should be faster if we could avoid this.
+    set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+endif()
+
+add_subdirectory(extern/armadillo)
+add_subdirectory(extern/half)
+
+add_subdirectory(extern/boost_src)
+
+# add_subdirectory(profiling)
+
+
+if(IMSRG_BUILD_PYTHON_BINDINGS)
+    add_subdirectory(extern/pybind11)
+endif()
 
 # Add a custom command that produces version.cpp, plus
 # a dummy output that's not actually produced, in order
@@ -33,12 +72,6 @@ ADD_CUSTOM_COMMAND(
            ${CMAKE_CURRENT_BINARY_DIR}/_version.cc
     COMMAND ${CMAKE_COMMAND} -P
             ${CMAKE_CURRENT_SOURCE_DIR}/git_version.cmake)
-
-if(USE_ARMADILLO_EXTERN)
-    list(APPEND ARMADILLO_LIBS armadillo)
-else()
-    list(APPEND ARMADILLO_LIBS ${ARMADILLO_LIBRARIES})
-endif()
 
 
 add_library(
@@ -72,7 +105,7 @@ add_library(
 target_link_libraries(
     ModelSpace
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     IMSRGProfiler
     AngMom
     PRIVATE
@@ -105,9 +138,10 @@ add_library(
 target_link_libraries(
     ThreeLegME
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     ModelSpace
     PRIVATE
+    # ${ARMADILLO_LIBRARIES}
     PhysicalConstants
 )
 
@@ -145,7 +179,7 @@ add_library(
 target_link_libraries(
     Operator
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     ModelSpace
     TwoBodyME
     ThreeBodyME
@@ -248,12 +282,13 @@ add_library(
 target_link_libraries(
     Commutator
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     Operator
     TwoBodyME
     ThreeLegME
     PRIVATE
     OpenMP::OpenMP_CXX
+    # ${ARMADILLO_LIBRARIES}
     PhysicalConstants
     AngMom
 )
@@ -280,7 +315,7 @@ add_library(
 target_link_libraries(
     HartreeFock
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     ModelSpace
     Operator
     IMSRGProfiler
@@ -298,38 +333,6 @@ target_link_libraries(
 
 add_library(
     imsrg_util OBJECT
-    Pwd
-    Pwd.hh Pwd.cc
-)
-
-target_link_libraries(
-    Pwd
-    PUBLIC
-    GSL::gsl
-    PhysicalConstants
-
-)
-
-add_library(
-    M0nu
-    M0nu.hh M0nu.cc
-)
-target_link_libraries(
-    M0nu
-    PUBLIC
-    OpenMP::OpenMP_CXX
-    GSL::gsl
-    ModelSpace
-    Operator
-    imsrg_util
-    PhysicalConstants
-    Pwd
-    PRIVATE
-    AngMom
-)
-
-add_library(
-    imsrg_util
     imsrg_util.hh imsrg_util.cc
     GaussLaguerre.hh
     M0nu.hh M0nu.cc
@@ -394,7 +397,7 @@ add_library(
 target_link_libraries(
     HFMBPT
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     HartreeFock
     PRIVATE
     PhysicalConstants
@@ -408,7 +411,7 @@ add_library(
 target_link_libraries(
     RPA
     PUBLIC
-    ${ARMADILLO_LIBS}
+    armadillo
     ModelSpace
     Operator
     PRIVATE
@@ -427,7 +430,7 @@ target_link_libraries(
     Operator
 #    Commutator
     PRIVATE
-    ${ARMADILLO_LIBS}
+    armadillo
     PhysicalConstants
     Version
     imsrg_util
@@ -528,16 +531,6 @@ if(IMSRG_BUILD_PYTHON_BINDINGS)
     set_target_properties(pyIMSRG PROPERTIES SUFFIX ".so")
     set_target_properties(pyIMSRG PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
-target_link_libraries(
-    UnitTest
-    PUBLIC
-    IMSRG
-    Parameters
-    PhysicalConstants
-    Version
-    OpenMP::OpenMP_CXX
-)
-
 
 # Install imsrg executable
 install(TARGETS imsrg++ 
@@ -554,3 +547,13 @@ file(GLOB HEADERS *.hh)
 install(FILES ${HEADERS} 
         DESTINATION ${INSTDIR}/include
         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ  GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+include(CTest)
+list(APPEND CMAKE_CTEST_ARGUMENTS "--verbose")
+# Unit Tests
+add_test(NAME Commutators2 COMMAND  python3 ../test/UnitTestCommutators2.py )
+add_test(NAME Commutators3 COMMAND  python3 ../test/UnitTestCommutators3.py )
+add_test(NAME Factorized   COMMAND  python3 ../test/UnitTestFactorized.py )
+add_test(NAME Triples      COMMAND  python3 ../test/UnitTestTriples.py )
+add_test(NAME Tensor       COMMAND  python3 ../test/UnitTestTensor.py )
+add_test(NAME NormalOrdering    COMMAND  python3 ../test/UnitTestNormalOrdering.py )

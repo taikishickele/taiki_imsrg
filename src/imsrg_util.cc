@@ -2428,15 +2428,9 @@ Operator J2Op(ModelSpace &modelspace)
     return EL;
   }
 
-
   /// Schiff Moment = Isoscalar dipole / 10 (where the sum is over proton orbits only)  with units e * fm^3  --added by DK. Ref. PHYSICAL REVIEW C 89, 014335 (2014)
   Operator SchiffOp(ModelSpace& modelspace,  double Rms)
   {   
-    Operator EL(modelspace, YL,0,YL%2,2);
-    if (not EL.IsReduced())
-       EL.MakeReduced();
-    double bL = pow( HBARC*HBARC/M_NUCLEON/modelspace.GetHbarOmega(),0.5*rL); // b^L where b=sqrt(hbar/mw)
-    double bLp = pow( HBARC*HBARC/M_NUCLEON/modelspace.GetHbarOmega(),0.5*1);
     Operator EL(modelspace, 1,0,1,2);
     double bL = pow( HBARC*HBARC/M_NUCLEON/modelspace.GetHbarOmega(),1.5); // b^L where b=sqrt(hbar/mw)
     double bLp = pow( HBARC*HBARC/M_NUCLEON/modelspace.GetHbarOmega(),0.5);
