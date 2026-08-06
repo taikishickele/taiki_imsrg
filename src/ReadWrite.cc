@@ -5009,14 +5009,14 @@ void ReadWrite::WriteValence3body( ThreeBodyME& threeBME, std::string filename )
      int b_nush   = itb.first;
      int b_imsrg  = itb.second;
      Orbit& ob = modelspace->GetOrbit(b_imsrg);
-     if (b_nush>a_nush) continue;
+     if (b_nush<a_nush) continue;
      int Jab_min = std::abs(oa.j2-ob.j2)/2;
      int Jab_max = (oa.j2+ob.j2)/2;
      for ( auto& itc : nushell2orb )
      {
       int c_nush   = itc.first;
       int c_imsrg  = itc.second;
-      if (c_nush>b_nush) continue;
+      if (c_nush<b_nush) continue;
       Orbit& oc = modelspace->GetOrbit(c_imsrg);
       for ( auto& itd : nushell2orb )
       {
@@ -5028,7 +5028,7 @@ void ReadWrite::WriteValence3body( ThreeBodyME& threeBME, std::string filename )
         int e_nush   = ite.first;
         int e_imsrg  = ite.second;
         Orbit& oe = modelspace->GetOrbit(e_imsrg);
-        if (e_nush>d_nush) continue;
+        if (e_nush<d_nush) continue;
         int Jde_min = std::abs(od.j2-oe.j2)/2;
         int Jde_max = (od.j2+oe.j2)/2;
         for ( auto& itf : nushell2orb )
@@ -5036,10 +5036,9 @@ void ReadWrite::WriteValence3body( ThreeBodyME& threeBME, std::string filename )
          int f_nush   = itf.first;
          int f_imsrg  = itf.second;
          Orbit& of = modelspace->GetOrbit(f_imsrg);
-//         std::cout << "abcdef: " << a_nush << " " << b_nush << " " << c_nush << " " << d_nush << " " << e_nush << " " << f_nush << "  PN = " << threeBME.PN_mode << std::endl;
-         if (f_nush>e_nush) continue;
-         if ( (oa.l+ob.l+oc.l+od.l+oe.l+of.l)%2 > 0) continue;
-         if ( (oa.tz2+ob.tz2+oc.tz2) != (od.tz2+oe.tz2+of.tz2) ) continue;
+         if (f_nush<e_nush) continue;
+         if ( (oa.l+ob.l+oc.l+od.l+oe.l+of.l)%2 != threeBME.parity ) continue;
+         if ( std::abs( (oa.tz2+ob.tz2+oc.tz2) - (od.tz2+oe.tz2+of.tz2)) != threeBME.rank_T  ) continue;
          for (int Jab = Jab_min; Jab <= Jab_max; Jab++)
          {
            if ( a_nush==b_nush and Jab%2>0 ) continue;
@@ -5050,13 +5049,7 @@ void ReadWrite::WriteValence3body( ThreeBodyME& threeBME, std::string filename )
              int twoJ_max = std::min( ( 2*Jab+oc.j2), (2*Jde+of.j2));
              for (int twoJ = twoJ_min; twoJ <= twoJ_max; twoJ+=2)
              {
-//               std::cout << "Calling get ME_pn   abcdef: " << a_imsrg << " " << b_imsrg << " " << c_imsrg << " " << d_imsrg << " " << e_imsrg << " " << f_imsrg << "   Jab Jde twoJ = " << Jab << " " << Jde << " " << twoJ << "   PN is " << threeBME.PN_mode << std::endl;
                double matel = threeBME.GetME_pn( Jab, Jde, twoJ, a_imsrg, b_imsrg, c_imsrg, d_imsrg, e_imsrg, f_imsrg);
-//               std::cout << "  matel = " << matel << std::endl;
-//               if (a_nush==1 and b_nush==1 and c_nush==1 and d_nush==1 and e_nush==1 and f_nush==1 and twoJ==5)
-//               {
-//                 std::cout << "abcdef: " << a_imsrg << " " << b_imsrg << " " << c_imsrg << " " << d_imsrg << " " << e_imsrg << " " << f_imsrg << "   Jab Jde twoJ = " << Jab << " " << Jde << " " << twoJ << "   matel = " << matel << "   PN is " << threeBME.PN_mode << std::endl;
-//               }
                intfile << std::setw(wint) << a_nush << " " << std::setw(wint) << b_nush << " " << std::setw(wint) << c_nush
                        << " " << std::setw(wint) << d_nush << " " << std::setw(wint) << e_nush << " " << std::setw(wint)
                        << f_nush << "   " << std::setw(wint)  << Jab << " " << std::setw(wint) << Jde
@@ -5072,7 +5065,6 @@ void ReadWrite::WriteValence3body( ThreeBodyME& threeBME, std::string filename )
      }// for itc
     }// for itb
    }// for ita
-   std::cout << "that went well" << std::endl;
 
 }
 
@@ -6080,6 +6072,8 @@ void ReadWrite::WriteTensorTokyo(std::string filename, Operator& op)
    }
 
    int cnt_tbme = 0;
+   if ( op.TwoBodyNorm() > 1e-8 )
+   {
    for (auto& itmat : op.TwoBody.MatEl)
    {
      TwoBodyChannel& tbc_bra = modelspace->GetTwoBodyChannel(itmat.first[0]);
@@ -6088,11 +6082,13 @@ void ReadWrite::WriteTensorTokyo(std::string filename, Operator& op)
      for (auto& ibra : tbc_bra.GetKetIndex_vv() ) {
        for (auto& iket : tbc_ket.GetKetIndex_vv() ) {
          double me = matrix(ibra,iket);
-         if (std::abs(me) < op.TwoBodyNorm() * 1e-7 or op.TwoBodyNorm() == 0)
+//         if (std::abs(me) < op.TwoBodyNorm() * 1e-7 or op.TwoBodyNorm() == 0)
+         if (std::abs(me) <  1e-9 )
            continue;
          cnt_tbme += 1;
        }
      }
+   }
    }
 
    outfile << "! reduced matrix elements" << std::endl;
@@ -6111,20 +6107,26 @@ void ReadWrite::WriteTensorTokyo(std::string filename, Operator& op)
    }
 
    outfile << cnt_tbme << " " << 0 << " " << modelspace->GetHbarOmega() << std::endl; // w/o mass dependence
-   for (auto& itmat : op.TwoBody.MatEl) {
+   if ( op.TwoBodyNorm() > 1e-8 )
+   {
+   for (auto& itmat : op.TwoBody.MatEl)
+   {
      TwoBodyChannel& tbc_bra = modelspace->GetTwoBodyChannel(itmat.first[0]);
      TwoBodyChannel& tbc_ket = modelspace->GetTwoBodyChannel(itmat.first[1]);
      auto& matrix = itmat.second;
-     for (auto& ibra : tbc_bra.GetKetIndex_vv() ) {
+     for (auto& ibra : tbc_bra.GetKetIndex_vv() )
+     {
        Ket& bra = tbc_bra.GetKet(ibra);
        int a_ind = orb2kshell[bra.p];
        int b_ind = orb2kshell[bra.q];
-       for (auto& iket : tbc_ket.GetKetIndex_vv() ) {
+       for (auto& iket : tbc_ket.GetKetIndex_vv() ) 
+       {
          Ket& ket = tbc_ket.GetKet(iket);
          int c_ind = orb2kshell[ket.p];
          int d_ind = orb2kshell[ket.q];
          double me = matrix(ibra,iket);
-         if (std::abs(me) < op.TwoBodyNorm() * 1e-7 or op.TwoBodyNorm() == 0)
+//         if (std::abs(me) < op.TwoBodyNorm() * 1e-7 or op.TwoBodyNorm() == 0)
+         if (std::abs(me) <  1e-9)
            continue;
          outfile << std::setw(wint) << a_ind << " " << std::setw(wint) << b_ind << " " << std::setw(wint) <<
            c_ind << " " << std::setw(wint) << d_ind << "   " << std::setw(wint) << tbc_bra.J <<
@@ -6132,6 +6134,7 @@ void ReadWrite::WriteTensorTokyo(std::string filename, Operator& op)
            std::setw(wdouble) << std::setprecision(pdouble) << me << std::endl;
        }
      }
+   }
    }
    outfile.close();
 }
@@ -6147,7 +6150,6 @@ void ReadWrite::skip_comments(std::ifstream& in)
     std::string com=line.substr(0,size_check);
     pos1=com.find('#');
     pos2=com.find('!');
-//    std::cout << " " << __func__ << "  line = " << line << "  pos1 , pos2 = " << pos1 << " " << pos2 << std::endl;
     if(pos1 > size_check and pos2 > size_check)
     {
       in.seekg (oldpos);

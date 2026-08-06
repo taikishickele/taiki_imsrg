@@ -24,7 +24,7 @@
 #include "Operator.hh"
 //#include "DaggerOperator.hh"
 #include "HartreeFock.hh"
-#include "IMSRGSolver.hh"
+//#include "IMSRGSolver.hh"
 #include "PhysicalConstants.hh"
 #include <gsl/gsl_math.h>
 #include <vector>
@@ -93,7 +93,7 @@ namespace imsrg_util
  Operator LdotS_Op(ModelSpace& modelspace);
  Operator L2rel_Op(ModelSpace& modelspace);
  Operator LCM_Op(ModelSpace& modelspace);
- Operator QdotQ_Op(ModelSpace& modelspace);
+ Operator QdotQ_Op(ModelSpace& modelspace, int lambda,  double ep, double en);
  Operator VQQ_Op(ModelSpace& modelspace);
  Operator VCoulomb_Op( ModelSpace& modelspace, int lmax=99999 );
  Operator VCentralCoulomb_Op( ModelSpace& modelspace, int lmax=99999 );
@@ -179,7 +179,7 @@ namespace imsrg_util
  long double TalmiB_SingleTerm(int na, int la, int nb, int lb, int p, int K);
  long double TalmiB_SingleTermPair(int na, int la, int nb, int lb, int p, int K, int nu);
  std::vector<double> GetOccupationsHF(HartreeFock& hf);
- std::vector<double> GetOccupations(HartreeFock& hf, IMSRGSolver& imsrgsolver);
+// std::vector<double> GetOccupations(HartreeFock& hf, IMSRGSolver& imsrgsolver);
  std::vector<double> GetDensity(std::vector<double>& occ, std::vector<double>& R, std::vector<int>& orbits, ModelSpace& modelspace);
 
  void WriteSPWaveFunctions( std::vector<std::string>& sporbits, HartreeFock& hf, std::string intfile );
@@ -189,7 +189,7 @@ namespace imsrg_util
 
  double FrequencyConversionCoeff(int n1, int l1, double hw1, int n2, int l2, double hw2);
 
- void CommutatorTest(Operator& X, Operator& Y);
+// void CommutatorTest(Operator& X, Operator& Y);
  void Reduce(Operator&);
  void UnReduce(Operator&);
 
