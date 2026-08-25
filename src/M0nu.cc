@@ -1105,7 +1105,7 @@ namespace M0nu
     }
     else if (transition == "T")
     {
-      return gsl_sf_bessel_j2(q*r12)*q*q*HBARC*HBARC * formfactor(q*q*HBARC*HBARC) / (q*q*HBARC*HBARC + neutrinomass*neutrinomass + sqrt(q*q*HBARC*HBARC + neutrinomass*neutrinomass) * Eclosure);
+      return -gsl_sf_bessel_j2(q*r12)*q*q*HBARC*HBARC * formfactor(q*q*HBARC*HBARC) / (q*q*HBARC*HBARC + neutrinomass*neutrinomass + sqrt(q*q*HBARC*HBARC + neutrinomass*neutrinomass) * Eclosure);
     }
     else
     {
@@ -1123,7 +1123,7 @@ namespace M0nu
     }
     else if (transition == "T")
     {
-      return gsl_sf_bessel_j2(q*r12)*q*q*HBARC*HBARC * formfactor(q*q*HBARC*HBARC, mu);
+      return -gsl_sf_bessel_j2(q*r12)*q*q*HBARC*HBARC * formfactor(q*q*HBARC*HBARC, mu);
     }
     else
     {
