@@ -1055,7 +1055,6 @@ namespace M0nu
 
   /// The following functions are to obtain radial distributions of the neutrinoless double beta decay matrix elements.
 
-
   double HO_Radial_psi(int n, int l, double hw, double r)
   {
     double b = sqrt( (HBARC*HBARC) / (hw * M_NUCLEON*0.5) );
@@ -1066,6 +1065,20 @@ namespace M0nu
     return psi;
   }
 
+  /// Spin-angular matrix element of the tensor operator
+  /// \f$ S_{12} = 3(\boldsymbol{\sigma_1}\cdot\hat{r})(\boldsymbol{\sigma_2}\cdot\hat{r}) - \boldsymbol{\sigma_1}\cdot\boldsymbol{\sigma_2} \f$
+  /// in the relative basis, i.e. \f$ \langle (l'S)J| S_{12} |(lS)J\rangle \f$, obtained from
+  /// \f$ S_{12} = \sqrt{24\pi/5}\,(Y_2(\hat{r})\cdot[\boldsymbol{\sigma_1}\otimes\boldsymbol{\sigma_2}]^{(2)}) \f$.
+  /// Reproduces the standard values +2 (l'=l=J), -2(J-1)/(2J+1) (l'=l=J-1),
+  /// -2(J+2)/(2J+1) (l'=l=J+1), 6*sqrt(J(J+1))/(2J+1) (l'=J-1,l=J+1), and vanishes for S=0.
+  double S12ME(int lp, int l, int S, int J)
+  {
+    if ((lp+l)%2 > 0) return 0.0;        // rank-2 operator conserves parity
+    if (std::abs(lp-l) > 2) return 0.0;  // ...and cannot connect |l-l'| > 2
+    return phase(J+S)*2*sqrt(30.0*(2*lp+1)*(2*l+1))
+           *AngMom::ThreeJ(lp,2,l,0,0,0)*AngMom::SixJ(lp,S,J,S,l,2);
+  }
+
   double fq_radial(double q, std::string transition, std::function<double(double)> formfactor, double Eclosure, double r12) // Radial M0nu integrand integrand
   {
     if (transition == "GT" or transition == "F") // add a else case to check
@@ -1074,7 +1087,7 @@ namespace M0nu
     }
     else if (transition == "T")
     {
-      return gsl_sf_bessel_j2(q*r12)*q*formfactor(q*q*HBARC*HBARC)/(q+Eclosure/HBARC);
+      return -gsl_sf_bessel_j2(q*r12)*q*formfactor(q*q*HBARC*HBARC)/(q+Eclosure/HBARC); // Minus sign from fourier transform
     }
     else
     {
@@ -1927,7 +1940,7 @@ namespace M0nu
                           if ( (std::abs(J-Jrel)>Lam)  or ( (Jrel+J)<Lam) ) continue;
                           normJrel  = sqrt((2*Jrel+1)*(2*Lf+1))*phase(Lf+lr+J+S)*AngMom::SixJ(Lam,lr,Lf,S,J,Jrel);
                           normJrelp = sqrt((2*Jrel+1)*(2*Li+1))*phase(Li+lpr+J+S)*AngMom::SixJ(Lam,lpr,Li,S,J,Jrel);
-                          integral += normJrel*normJrelp*GetM0nuIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,Eclosure,r12,IntList);
+                          integral += S12ME(lpr,lr,S,Jrel)*normJrel*normJrelp*GetM0nuIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,Eclosure,r12,IntList);
                         }
                         sumMT += Df*Di*integral; // perform the Moshinsky transformation
                         sumMTas += Df*asDi*integral; // (anti-symmetric part)
@@ -2345,7 +2358,7 @@ namespace M0nu
                           if ( (std::abs(J-Jrel)>Lam)  or ( (Jrel+J)<Lam) ) continue;
                           normJrel  = sqrt((2*Jrel+1)*(2*Lf+1))*phase(Lf+lr+J+S)*AngMom::SixJ(Lam,lr,Lf,S,J,Jrel);
                           normJrelp = sqrt((2*Jrel+1)*(2*Li+1))*phase(Li+lpr+J+S)*AngMom::SixJ(Lam,lpr,Li,S,J,Jrel);
-                          integral += normJrel*normJrelp*GetM0nuSterileIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,Eclosure,neutrinomass,r12,IntList);
+                          integral += S12ME(lpr,lr,S,Jrel)*normJrel*normJrelp*GetM0nuSterileIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,Eclosure,neutrinomass,r12,IntList);
                         }
                         sumMT += Df*Di*integral; // perform the Moshinsky transformation
                         sumMTas += Df*asDi*integral; // (anti-symmetric part)
@@ -2763,7 +2776,7 @@ namespace M0nu
                           if ( (std::abs(J-Jrel)>Lam)  or ( (Jrel+J)<Lam) ) continue;
                           normJrel  = sqrt((2*Jrel+1)*(2*Lf+1))*phase(Lf+lr+J+S)*AngMom::SixJ(Lam,lr,Lf,S,J,Jrel);
                           normJrelp = sqrt((2*Jrel+1)*(2*Li+1))*phase(Li+lpr+J+S)*AngMom::SixJ(Lam,lpr,Li,S,J,Jrel);
-                          integral += normJrel*normJrelp*GetM0nuN2LOIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,mu,regulator_cutoff,regulator_power,reg_type,r12,IntList);
+                          integral += S12ME(lpr,lr,S,Jrel)*normJrel*normJrelp*GetM0nuN2LOIntegral_R(e2max,nr,lr,npr,lpr,S,Jrel,hw,transition,formfactor,mu,regulator_cutoff,regulator_power,reg_type,r12,IntList);
                         }
                         sumMT += Df*Di*integral; // perform the Moshinsky transformation
                         sumMTas += Df*asDi*integral; // (anti-symmetric part)

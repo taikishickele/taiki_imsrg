@@ -87,6 +87,7 @@ namespace M0nu
   Operator TensorN2LO(ModelSpace &modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type);
 
   double HO_Radial_psi(int n, int l, double hw, double r);
+  double S12ME(int lp, int l, int S, int J);
   double fq_radial(double q, std::string transition, std::function<double(double)> formfactor, double Eclosure, double r12);
   double fq_radial_sterile(double q, std::string transition, std::function<double(double)> formfactor, double Eclosure, double neutrinomass, double r12);
   double fq_radial_n2lo(double q, std::string transition, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
