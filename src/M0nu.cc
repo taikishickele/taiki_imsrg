@@ -1536,7 +1536,7 @@ namespace M0nu
   Operator GamowTeller_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "GT";
@@ -1673,7 +1673,7 @@ namespace M0nu
   Operator Fermi_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "F";
@@ -1684,7 +1684,7 @@ namespace M0nu
     M0nuF_TBME.SetHermitian(); // it should be Hermitian
     int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
     const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [fm]
-    const double prefact = 4*Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
+    const double prefact = 4*Rnuc/(PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
     modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
     std::unordered_map<uint64_t,double> IntList = PreCalculateM0nuIntegrals_R(e2max, hw, transition, formfactor, Eclosure, r12); // pre-calculate the needed integrals over dq and dr, for efficiency
     M0nuF_TBME.profiler.timer["M0nuF_1_sur"] += omp_get_wtime() - t_start; // profiling (r)
@@ -1809,7 +1809,7 @@ namespace M0nu
   Operator Tensor_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "T";
@@ -1954,7 +1954,7 @@ namespace M0nu
   Operator GamowTellerSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "GT";
@@ -2091,7 +2091,7 @@ namespace M0nu
   Operator FermiSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "F";
@@ -2102,7 +2102,7 @@ namespace M0nu
     M0nuF_TBME.SetHermitian(); // it should be Hermitian
     int Anuc = modelspace.GetTargetMass(); // the mass number for the desired nucleus
     const double Rnuc = R0*pow(Anuc,1.0/3.0); // the nuclear radius [fm]
-    const double prefact = 4*Rnuc/(PI*PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
+    const double prefact = 4*Rnuc/(PI); // factor in-front of M0nu TBME, extra global 2 for nutbar (as confirmed by benchmarking with Ca48 NMEs) [fm]
     modelspace.PreCalculateMoshinsky(); // pre-calculate the needed Moshinsky brackets, for efficiency
     std::unordered_map<uint64_t,double> IntList = PreCalculateM0nuSterileIntegrals_R(e2max, hw, transition, formfactor, Eclosure, neutrinomass, r12); // pre-calculate the needed integrals over dq and dr, for efficiency
     M0nuF_TBME.profiler.timer["M0nuSterileF_1_sur"] += omp_get_wtime() - t_start; // profiling (r)
@@ -2227,7 +2227,7 @@ namespace M0nu
   Operator TensorSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "T";
@@ -2372,7 +2372,7 @@ namespace M0nu
   Operator GamowTellerN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "GT";
@@ -2509,7 +2509,7 @@ namespace M0nu
   Operator FermiN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "F";
@@ -2645,7 +2645,7 @@ namespace M0nu
   Operator TensorN2LO_R(ModelSpace& modelspace, std::function<double(double,double)> formfactor, double mu, double regulator_cutoff, int regulator_power, std::string reg_type, double r12)
   {
     bool reduced = true;
-    r12 =  r12*SQRT2;
+    // r12 =  r12*SQRT2;
     double t_start, t_start_tbme, t_start_omp; // profiling (v)
     t_start = omp_get_wtime(); // profiling (s)
     std::string transition = "T";

@@ -3,7 +3,7 @@ From: ubuntu:latest
 Stage:compile
 
 %files
-  ../taiki_imsrg /taiki_imsrg
+  ../imsrg /imsrg
 
 %post
   DEBIAN_FRONTEND=noninteractive
@@ -20,10 +20,10 @@ Stage:compile
   cmake \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-  rm -rf /taiki_imsrg/build
-  cmake -S /taiki_imsrg/src -B /taiki_imsrg/build
-  cmake --build /taiki_imsrg/build -j $(nproc)
-  find /taiki_imsrg/build -name '*IMSRG*.so'
+  rm -rf /imsrg/build
+  cmake -S /imsrg/src -B /imsrg/build
+  cmake --build /imsrg/build -j $(nproc)
+  find /imsrg/build -name '*IMSRG*.so'
 
 
 Bootstrap: docker
@@ -42,8 +42,8 @@ Stage:final
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 %files from compile
-  /taiki_imsrg/build/pyIMSRG.so /lib/
-  /taiki_imsrg/build/libIMSRG.so /lib/
+  /imsrg/build/pyIMSRG.so /lib/
+  /imsrg/build/libIMSRG.so /lib/
 
 %environment
   export PYTHONPATH="$PYTHONPATH:/lib/"
