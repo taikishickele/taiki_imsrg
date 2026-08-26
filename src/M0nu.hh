@@ -71,7 +71,7 @@ namespace M0nu
   Operator GamowTeller(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor); ///< Gamow-Teller part of M0nu operator
   Operator Fermi(ModelSpace& modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor); ///< Fermi part of M0nu operator
   Operator Tensor(ModelSpace &modelspace, double Eclosure, std::string src, std::function<double(double)> formfactor); ///< Tensor part of M0nu operator
-  Operator Contact(ModelSpace& modelspace, double regulator_cutoff, int regualtor_power); ///<Contact part of M0nu operator
+  Operator Contact(ModelSpace& modelspace, double regulator_cutoff, int regulator_power, std::string reg_type); ///<Contact part of M0nu operator
   Operator DGT_Op(ModelSpace& modelspace); //< Double Gamow-Teller operator
 
   Operator GamowTellerHeavy(ModelSpace &modelspace,  std::string src, std::function<double(double)> formfactor); ///< Gamow-Teller part of M0nu operator
@@ -103,6 +103,7 @@ namespace M0nu
   Operator GamowTeller_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12);
   Operator Fermi_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12);
   Operator Tensor_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double r12);
+  Operator Contact_R(ModelSpace& modelspace, double regulator_cutoff, int regulator_power, std::string reg_type, double r12);
   Operator GamowTellerSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
   Operator FermiSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);
   Operator TensorSterile_R(ModelSpace& modelspace, double Eclosure, std::function<double(double)> formfactor, double neutrinomass, double r12);

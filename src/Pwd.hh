@@ -84,7 +84,7 @@ class PWD
 
     void setPotential(std::function<double(double, double, double)> potential_func,  std::string potential_type);
 
-    void setRegulator(double regulator_cutoff, int regulator_power, std::string type);
+    void setRegulator(double regulator_cutoff, int regulator_power, std::string regulator_type);
 
     void calcA(int e2max, int lmax);
     int getAsize();

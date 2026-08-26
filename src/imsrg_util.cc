@@ -402,7 +402,8 @@ namespace imsrg_util
           std::istringstream(opnamesplit[2]) >> regulator_cutoff;
           int regulator_power;
           std::istringstream(opnamesplit[3]) >> regulator_power;
-          theop = M0nu::Contact(modelspace, regulator_cutoff, regulator_power);
+          std::string regulator_type = opnamesplit[4];
+          theop = M0nu::Contact(modelspace, regulator_cutoff, regulator_power, regulator_type);
         }
         
       }
@@ -678,7 +679,7 @@ namespace imsrg_util
         }
         if (LECs.size() < 3)
         {
-          std::cout << "Uh oh. You didn't specify enough LECs. I'm giving you an empy operator instead." << std::endl;
+          std::cout << "Uh oh. You didn't specify enough LECs. I'm giving you an empty operator instead." << std::endl;
           return theop;
         }
         theop = TViolatingPotential_Op( modelspace, LECs );
@@ -691,65 +692,80 @@ namespace imsrg_util
           {"F", &M0nu::Fermi_R},
           {"T", &M0nu::Tensor_R}};
 
-        double Eclosure;
-        double r12;
-        std::istringstream(opnamesplit[2]) >> Eclosure;
-        std::string formfactor = opnamesplit[3];
-        std::istringstream(opnamesplit[4]) >> r12;
-
-        if (formfactor == "none")
+        if (M0nuopname != "C")
         {
-          std::map<std::string, std::function<double(double)>> FormFactorList{
-            {"GT",M0nu::GTFormFactor},
-            {"F", M0nu::FermiFormFactor},
-            {"T", M0nu::TensorFormFactor}
-        };
-        theop = OPList[M0nuopname](modelspace, Eclosure, FormFactorList[M0nuopname], r12);
+          double Eclosure;
+          double r12;
+          std::istringstream(opnamesplit[2]) >> Eclosure;
+          std::string formfactor = opnamesplit[3];
+          std::istringstream(opnamesplit[4]) >> r12;
+
+          if (formfactor == "none")
+          {
+            std::map<std::string, std::function<double(double)>> FormFactorList{
+              {"GT",M0nu::GTFormFactor},
+              {"F", M0nu::FermiFormFactor},
+              {"T", M0nu::TensorFormFactor}
+          };
+          theop = OPList[M0nuopname](modelspace, Eclosure, FormFactorList[M0nuopname], r12);
+          }
+          else
+          {
+            if (M0nuopname == "GT")
+            {
+              if (formfactor == "AA")
+              {
+                theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_AA, r12);
+              }
+              else if (formfactor == "AP")
+              {
+                theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_AP, r12);
+              }
+              else if (formfactor == "PP")
+              {
+                theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_PP, r12);
+              }
+              else if (formfactor == "MM")
+              {
+                theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_MM, r12);
+              }
+            }
+            else if (M0nuopname == "F")
+            {
+              theop = M0nu::Fermi_R(modelspace, Eclosure, M0nu::hF_VV, r12);
+            }
+            else if (M0nuopname == "T")
+            {
+              if (formfactor == "AA")
+              {
+                theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_AA, r12);
+              }
+              else if (formfactor == "AP")
+              {
+                theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_AP, r12);
+              }
+              else if (formfactor == "PP")
+              {
+                theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_PP, r12);
+              }
+              else if (formfactor == "MM")
+              {
+                theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_MM, r12);
+              }
+            }
+          }
         }
         else
         {
-          if (M0nuopname == "GT")
-          {
-            if (formfactor == "AA")
-            {
-              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_AA, r12);
-            }
-            else if (formfactor == "AP")
-            {
-              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_AP, r12);
-            }
-            else if (formfactor == "PP")
-            {
-              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_PP, r12);
-            }
-            else if (formfactor == "MM")
-            {
-              theop = M0nu::GamowTeller_R(modelspace, Eclosure, M0nu::hGT_MM, r12);
-            }
-          }
-          else if (M0nuopname == "F")
-          {
-            theop = M0nu::Fermi_R(modelspace, Eclosure, M0nu::hF_VV, r12);
-          }
-          else if (M0nuopname == "T")
-          {
-            if (formfactor == "AA")
-            {
-              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_AA, r12);
-            }
-            else if (formfactor == "AP")
-            {
-              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_AP, r12);
-            }
-            else if (formfactor == "PP")
-            {
-              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_PP, r12);
-            }
-            else if (formfactor == "MM")
-            {
-              theop = M0nu::Tensor_R(modelspace, Eclosure, M0nu::hT_MM, r12);
-            }
-          }
+          double regulator_cutoff;
+          double r12;
+          std::istringstream(opnamesplit[2]) >> regulator_cutoff;
+          int regulator_power;
+          std::istringstream(opnamesplit[3]) >> regulator_power;
+          std::string regulator_type = opnamesplit[4];
+          std::istringstream(opnamesplit[5]) >> r12;
+
+          theop = M0nu::Contact_R(modelspace, regulator_cutoff, regulator_power, regulator_type, r12);
         }
       }
       else if (opnamesplit[0] == "M0nuSterileR") // Radial dependance of the sterile neutrino NME
