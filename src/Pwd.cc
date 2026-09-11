@@ -452,7 +452,7 @@ double regulator_local(double q, double regulator_cutoff, int regulator_power) /
   return exp(-pow(q * HBARC / regulator_cutoff, 2 * regulator_power));
 }
 
-double regulator_nonlocal(double p, double pp, double regulator_cutoff, int regulator_power) // p and pp in fm^-1
+double regulator_nonlocal(double p, double pp, double regulator_cutoff, int regulator_power) // p and pp in fm^-1, regulator_cutoff in MeV
 {
   return exp(-pow(p * HBARC / regulator_cutoff, 2 * regulator_power)) * exp(-pow(pp * HBARC / regulator_cutoff, 2 * regulator_power));
 }
